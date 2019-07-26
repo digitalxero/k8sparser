@@ -6,19 +6,19 @@ import (
 	"reflect"
 	"strings"
 	"testing"
-	//"github.com/modern-go/reflect2"
 )
 
 func TestParse(t *testing.T) {
 	type args struct {
 		reader io.Reader
 	}
-	tests := []struct {
+	type testDef struct {
 		name     string
 		args     args
 		numItems int
 		wantErr  bool
-	}{
+	}
+	tests := []testDef{
 		{
 			name: "single namespace",
 			args: args{
@@ -114,30 +114,32 @@ metadata:
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotItems, err := Parse(tt.args.reader)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Parse() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if len(gotItems) != tt.numItems {
-				t.Errorf("Parse() gotItems = %v, want %v", len(gotItems), tt.numItems)
-				return
-			}
-
-			for _, item := range gotItems {
-				converted, err := callMethodByName(item, item.Kind)
-				if err != nil {
-					t.Errorf(err.Error())
+		func(test testDef) {
+			t.Run(test.name, func(t *testing.T) {
+				gotItems, err := Parse(test.args.reader)
+				if (err != nil) != test.wantErr {
+					t.Errorf("Parse() error = %v, wantErr %v", err, test.wantErr)
+					return
+				}
+				if len(gotItems) != test.numItems {
+					t.Errorf("Parse() gotItems = %v, want %v", len(gotItems), test.numItems)
 					return
 				}
 
-				if converted.IsNil() {
-					t.Errorf("item.%s() did not return a proper type", item.Kind)
-					return
+				for _, item := range gotItems {
+					converted, err := callMethodByName(item, item.Kind)
+					if err != nil {
+						t.Errorf(err.Error())
+						return
+					}
+
+					if converted.IsNil() {
+						t.Errorf("item.%s() did not return a proper type", item.Kind)
+						return
+					}
 				}
-			}
-		})
+			})
+		}(tt)
 	}
 }
 
