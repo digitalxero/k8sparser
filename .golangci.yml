@@ -1,0 +1,43 @@
+linters:
+  enable-all: true
+  disable:
+    - gochecknoglobals
+run:
+  build-tags:
+    - netgo
+    - osusergo
+linters-settings:
+  maligned:
+    # print struct with more effective memory layout or not, false by default
+    suggest-new: true
+  gocyclo:
+    # minimal code complexity to report, 30 by default (but we recommend 10-20)
+    min-complexity: 20
+  goimports:
+    # put imports beginning with prefix after 3rd-party packages;
+    # it's a comma-separated list of prefixes
+    local-prefixes: github.com/digitalxero/k8sparser
+  govet:
+    check-shadowing: true
+  errcheck:
+    ignore: fmt:.*,io/ioutil:^Read.*,github.com/spf13/viper:.*,github.com/go-kit/kit/log:.*,github.com/go-kit/kit/level:.*,github.com/pkg/errors:^Wrap.*
+  misspell:
+    locale: US
+  lll:
+    line-length: 140
+  golint:
+    min-confidence: 0
+  nakedret:
+    max-func-lines: 0
+  gocritic:
+    enabled-tags:
+      - performance
+      - style
+    disabled-checks:
+      - wrapperFunc
+      - dupImport # https://github.com/go-critic/go-critic/issues/845
+issues:
+  exclude-rules:
+    - text: "G104" # gosec G104 is caught by errcheck
+      linters:
+        - gosec
